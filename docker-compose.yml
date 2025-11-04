@@ -1,150 +1,66 @@
-version: '3.7'
-
 services:
-  prometheus:
-    container_name: prometheus
-    image: prom/prometheus:latest
+  kafka-b:
+    image: docker.io/apache/kafka:4.0.1
+    container_name: kafka-b
     ports:
-      - '9090:9090'
-    volumes:
-      - prometheus_data:/etc/prometheus
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    depends_on:
-      - api-build
-    profiles:
-      - build
-
-  grafana:
-    container_name: grafana
-    image: grafana/grafana
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./docker/grafana/grafana.ini:/etc/grafana/grafana.ini
-      - ./docker/grafana/provisioning:/etc/grafana/provisioning
-      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards
+      - "9092:9092"
+      - "9094:9094"
     environment:
-      GF_INSTALL_PLUGINS: 'grafana-clock-panel,grafana-simple-json-datasource'
-    depends_on:
-      - prometheus
-    profiles:
-      - build
-
-  nginx:
-    container_name: nginx
-    image: nginx:stable-alpine
-    env_file:
-      - .env
-    ports:
-      - "${NGINX_HTTP_PORT}:80"
-    volumes:
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - api-build
-    profiles:
-      - build
-
-  redis-build:
-    container_name: redis
-    image: redis:latest
-    volumes:
-      - redis_data:/data
-    ports:
-      - "${REDIS_PORT}:6379"
-    profiles:
-      - build
-
-  api-build:
-    build:
-      context: .
-      dockerfile: docker/api/Dockerfile
-    env_file:
-      - .env
-    environment:
-      - MONGO_HOST=mongo
-      - POSTGRES_HOST=database
-      - REDIS_HOST=redis
-      - ASPNETCORE_ENVIRONMENT=Production
-    depends_on:
-      database:
-        condition: service_healthy
-      redis-build:
-        condition: service_started
-    restart: always
-    profiles:
-      - build
-
-  database:
-    image: postgis/postgis:16-3.4-alpine
-    ports:
-      - ${POSTGRES_PORT}:5432
-    env_file:
-      - .env
-    restart: always
-    volumes:
-      - database_data:/var/lib/postgresql/shared-data/
-    healthcheck:
-      test: [ "CMD", "pg_isready" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    profiles:
-      - build
-      - dev
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-b:9092,EXTERNAL://localhost:9094
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-b:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
 
   mongo:
     container_name: mongo
-    image: mongo:latest
-    env_file:
-      - .env
-    volumes:
-      - ./docker/mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-      - mongo_data:/data/db
+    image: docker.io/mongo:8.0.15
     ports:
       - "${MONGO_PORT}:27017"
-    profiles:
-      - build
-      - dev
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
 
-  redis:
-    container_name: redis
-    image: redis/redis-stack:latest
+  mongo-express:
+    container_name: mongo-express
+    image: mongo-express:latest
     ports:
-      - "${REDIS_PORT}:6379"
-      - "${REDIS_PORT_INTERFACE}:8001"
-    profiles:
-      - dev
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongo:${MONGO_PORT}/${MONGO_DB}?authSource=admin
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
+    depends_on:
+      - mongo
 
-  api:
+  postgres:
     build:
       context: .
-      dockerfile: docker/api/Dockerfile
-    ports:
-      - ${BEAT_API_REST_PORT}:80
-    env_file:
-      - .env
+      dockerfile: docker/postgres/Dockerfile
+    container_name: db-container
     environment:
-      - MONGO_HOST=mongo
-      - POSTGRES_HOST=database
-      - REDIS_HOST=redis
-      - ASPNETCORE_ENVIRONMENT=Development
-    depends_on:
-      database:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    restart: always
-    profiles:
-      - dev
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
 
-volumes:
-  grafana_data:
-  redis_data:
-  prometheus_data:
-  mongo_data:
-  database_data:
+  redis:
+    image: docker.io/redis/redis-stack:latest
+    container_name: redis
+    ports:
+      - "${REDIS_PORT}:6379"
+      - "${REDIS_UI_PORT}:8001"

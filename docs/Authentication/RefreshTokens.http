@@ -1,7 +1,0 @@
-﻿@refreshToken = 
-
-GET /auth/refresh_tokens HTTP/1.1
-Content-Type: application/json
-Host: {{host}}
-Authorization: Bearer {{refreshToken}}
-User-Agent: HTTPie
