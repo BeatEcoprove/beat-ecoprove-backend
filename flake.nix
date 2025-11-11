@@ -19,7 +19,7 @@
         if envVal == "" then "podman" else envVal;
 
         pkgs = nixpkgs.legacyPackages.${system};
-        servicesConfig = import ./services.nix;
+        servicesConfig = import ./nix/services.nix;
 
         systemLinux =
           if pkgs.stdenv.isAarch64 then "aarch64-linux"

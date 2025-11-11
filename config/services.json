@@ -1,0 +1,36 @@
+{
+  "services": {
+    "auth-service": {
+      "host": "0.0.0.0",
+      "port": 2000,
+      "api_version": 1,
+      "prefix": "/auth",
+      "strip_prefix": true,
+      "skip_prefix_for": [ "/.well-known", "/swagger", "/health" ]
+    },
+    "core-service": {
+      "host": "0.0.0.0",
+      "port": 3000,
+      "api_version": 1,
+      "prefix": "/core",
+      "strip_prefix": true,
+      "skip_prefix_for": [ "/swagger" ]
+    },
+    "messaging-service": {
+      "host": "0.0.0.0",
+      "port": 4000,
+      "api_version": 1,
+      "prefix": "/messaging",
+      "strip_prefix": true,
+      "skip_prefix_for": [ "/swagger" ]
+    },
+    "websocket": {
+      "host": "0.0.0.0",
+      "port": 4000,
+      "prefix": "/socket",
+      "api_version": 1,
+      "strip_prefix": false,
+      "skip_prefix_for": [ ]
+    }
+  }
+}

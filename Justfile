@@ -3,8 +3,13 @@ set dotenv-load
 default:
     @just --list
 
+# Serve proxy localy
+serve:
+  cargo run
+
 # Build microservice images
 build-images:
+  nix flake update
   nix run .#build-all -L
 
 # Compose for development

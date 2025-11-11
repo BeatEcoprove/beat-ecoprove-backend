@@ -485,3 +485,8 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+
+# Added by cargo
+
+/target

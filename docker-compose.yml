@@ -44,32 +44,32 @@ services:
     volumes:
       - ./docker/postgres/init:/docker-entrypoint-initdb.d
 
-  auth-service:
-    image: localhost/identity-service:1.0.0
-    container_name: auth-service
-    ports:
-      - "${BEAT_IDENTITY_SERVER}:${BEAT_IDENTITY_SERVER}"
-    env_file:
-      - .env
-    environment:
-      - POSTGRES_DB=identity-db
-
-  messaging-service:
-    image: localhost/messaging-service:1.0.0
-    container_name: messaging-service
-    ports:
-      - "${BEAT_MESSASSING_SERVER}:${BEAT_MESSASSING_SERVER}"
-    env_file:
-      - .env
-    environment:
-      - POSTGRES_DB=messaging-db
-
-  core-service:
-    image: localhost/core-service:1.0.0
-    container_name: core-service
-    ports:
-      - "${BEAT_API_REST_PORT}:${BEAT_API_REST_PORT}"
-    env_file:
-      - .env
-    environment:
-      - POSTGRES_DB=core-db
+  # auth-service:
+  #   image: localhost/identity-service:1.0.0
+  #   container_name: auth-service
+  #   ports:
+  #     - "${BEAT_IDENTITY_SERVER}:${BEAT_IDENTITY_SERVER}"
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - POSTGRES_DB=identity-db
+  #
+  # messaging-service:
+  #   image: localhost/messaging-service:1.0.0
+  #   container_name: messaging-service
+  #   ports:
+  #     - "${BEAT_MESSASSING_SERVER}:${BEAT_MESSASSING_SERVER}"
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - POSTGRES_DB=messaging-db
+  #
+  # core-service:
+  #   image: localhost/core-service:1.0.0
+  #   container_name: core-service
+  #   ports:
+  #     - "${BEAT_API_REST_PORT}:${BEAT_API_REST_PORT}"
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - POSTGRES_DB=core-db

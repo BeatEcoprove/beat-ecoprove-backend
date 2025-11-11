@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+
+# Target directory (build artifacts)
+target/
+
+# Environment files (sensitive data)
+.env
+.env.*
+!.env.example
+
+# Docker files
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Documentation
+README.md
+*.md
+
+# Nix files
+flake.nix
+flake.lock
+services.nix
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Justfile
+Justfile
+
+# Docker directory
+docker/
