@@ -1,0 +1,6 @@
+services:
+  redis:
+    image: docker.io/redis:8.4-rc1-alpine
+    container_name: redis
+    ports:
+      - "${REDIS_PORT}:6379"

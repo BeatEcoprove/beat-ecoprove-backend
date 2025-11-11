@@ -13,7 +13,11 @@
   outputs = { self, nixpkgs, flake-utils, ... }@inputs:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        containerTool = "podman";
+        containerTool = let
+        envVal = builtins.getEnv "CONTAINER_TOOL";
+        in
+        if envVal == "" then "podman" else envVal;
+
         pkgs = nixpkgs.legacyPackages.${system};
         servicesConfig = import ./services.nix;
 
@@ -30,6 +34,10 @@
             pkgs.writeShellScript "build-${name}" ''
               echo "📦 Loading ${name}..."
               ${containerTool} load < ${img}
+
+              ${containerTool} tag localhost/${name}:$VERSION ${name}:$VERSION 2>/dev/null || true
+              ${containerTool} tag ${name}:$VERSION localhost/${name}:$VERSION 2>/dev/null || true
+
               echo "✅ Loaded ${name}"
             ''
           else
@@ -47,6 +55,8 @@
               VERSION=$(nix eval --raw "${src}#version.${systemLinux}" 2>/dev/null || echo "latest")
 
               ${containerTool} build -t ${name}:$VERSION .
+              ${containerTool} tag ${name}:$VERSION localhost/${name}:$VERSION 2>/dev/null || true
+
               echo "✅ Built ${name}"
             '';
       in
