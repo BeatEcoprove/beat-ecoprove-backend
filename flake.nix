@@ -17,10 +17,15 @@
         pkgs = nixpkgs.legacyPackages.${system};
         servicesConfig = import ./services.nix;
 
+        systemLinux =
+          if pkgs.stdenv.isAarch64 then "aarch64-linux"
+          else if pkgs.stdenv.isx86_64 then "x86_64-linux"
+          else system;
+
         buildService = name: config:
           if config.flake then
             let
-              img = inputs.${name}.packages.${system}.docker;
+              img = inputs.${name}.packages.${systemLinux}.docker;
             in
             pkgs.writeShellScript "build-${name}" ''
               echo "📦 Loading ${name}..."
@@ -39,7 +44,7 @@
               cp -r ${src}/* $TEMP_DIR/
               cd $TEMP_DIR
 
-              VERSION=$(nix eval --raw "${src}#version.${system}" 2>/dev/null || echo "latest")
+              VERSION=$(nix eval --raw "${src}#version.${systemLinux}" 2>/dev/null || echo "latest")
 
               ${containerTool} build -t ${name}:$VERSION .
               echo "✅ Built ${name}"

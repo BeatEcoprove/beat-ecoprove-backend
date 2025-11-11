@@ -64,3 +64,13 @@ services:
     ports:
       - "${REDIS_PORT}:6379"
       - "${REDIS_UI_PORT}:8001"
+
+  auth-service:
+    image: localhost/identity-service:1.0.0
+    container_name: auth-service
+    ports:
+      - ""
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=identity-db
