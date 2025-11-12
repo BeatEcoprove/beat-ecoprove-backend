@@ -1,6 +1,25 @@
 services:
+  postgres:
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mongo:
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+
+  kafka-b:
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+
   redis:
     image: docker.io/redis:8.4-rc1-alpine
     container_name: redis
     ports:
       - "${REDIS_PORT}:6379"
+
+volumes:
+  postgres_data:
+  mongo_data:
+  mongo_config:
+  kafka_data:

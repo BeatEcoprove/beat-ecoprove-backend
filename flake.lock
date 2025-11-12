@@ -6,11 +6,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1762224053,
-        "narHash": "sha256-3rbdszmJSWTtP1/bFvPDGdZ2MMrMM22nhw7Gjwo6ssk=",
+        "lastModified": 1762901013,
+        "narHash": "sha256-U2brYR5qQJ44y+yItlbd/zE/gImUo4Qkr2M7Wmlmitk=",
         "owner": "BeatEcoprove",
         "repo": "beat-ecoprove-auth",
-        "rev": "87f21cfba26a4234352e1c675149968f24a5e5b6",
+        "rev": "28b971fd1f74072728d2739601eb4f1b91415267",
         "type": "github"
       },
       "original": {
@@ -116,11 +116,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1762823128,
-        "narHash": "sha256-ZpjXGJURxLqKGz4+foT+eKQVN6Bjcq4FfMeAV54Ae0I=",
+        "lastModified": 1762901055,
+        "narHash": "sha256-g0G1T5BgpFyzj8SRHyE0otUPpMPc/hVMbC+1zPZhDmg=",
         "owner": "BeatEcoprove",
         "repo": "beat-ecoprove-messaging",
-        "rev": "d82c10c9fc7dbf6ff2d80ff4b7902b94086e24fb",
+        "rev": "320e77d87add2c7831e9067a17a232e6c38fa8cf",
         "type": "github"
       },
       "original": {

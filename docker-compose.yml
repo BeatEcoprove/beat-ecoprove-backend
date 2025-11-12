@@ -19,6 +19,11 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/9092"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
 
   mongo:
     container_name: mongo
@@ -29,6 +34,11 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_DB}
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/27017"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
 
   postgres:
     build:
@@ -43,33 +53,50 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
-  # auth-service:
-  #   image: localhost/identity-service:1.0.0
-  #   container_name: auth-service
-  #   ports:
-  #     - "${BEAT_IDENTITY_SERVER}:${BEAT_IDENTITY_SERVER}"
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - POSTGRES_DB=identity-db
-  #
-  # messaging-service:
-  #   image: localhost/messaging-service:1.0.0
-  #   container_name: messaging-service
-  #   ports:
-  #     - "${BEAT_MESSASSING_SERVER}:${BEAT_MESSASSING_SERVER}"
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - POSTGRES_DB=messaging-db
-  #
-  # core-service:
-  #   image: localhost/core-service:1.0.0
-  #   container_name: core-service
-  #   ports:
-  #     - "${BEAT_API_REST_PORT}:${BEAT_API_REST_PORT}"
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - POSTGRES_DB=core-db
+  proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: proxy
+    env_file:
+      - .env
+    depends_on:
+      - auth-service
+      - messaging-service
+      - core-service
+
+  auth-service:
+    image: localhost/identity-service:1.0.0
+    container_name: auth-service
+    ports:
+      - "${BEAT_IDENTITY_SERVER}:${BEAT_IDENTITY_SERVER}"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=identity-db
+
+  messaging-service:
+    image: localhost/messaging-service:1.0.0
+    container_name: messaging-service
+    ports:
+      - "${BEAT_MESSASSING_SERVER}:${BEAT_MESSASSING_SERVER}"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=messaging-db
+
+  core-service:
+    image: localhost/core-service:1.0.0
+    container_name: core-service
+    ports:
+      - "${BEAT_API_REST_PORT}:${BEAT_API_REST_PORT}"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=core-db
