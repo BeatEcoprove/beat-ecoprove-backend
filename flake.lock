@@ -116,11 +116,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1762901055,
-        "narHash": "sha256-g0G1T5BgpFyzj8SRHyE0otUPpMPc/hVMbC+1zPZhDmg=",
+        "lastModified": 1762912332,
+        "narHash": "sha256-VsDrCPUQ4D0CwVvu4MrbKkngC2wrRVW1emxXd0axmAE=",
         "owner": "BeatEcoprove",
         "repo": "beat-ecoprove-messaging",
-        "rev": "320e77d87add2c7831e9067a17a232e6c38fa8cf",
+        "rev": "ec01e670f5c9f03f84938dd2434d431d897b52ed",
         "type": "github"
       },
       "original": {

@@ -66,37 +66,51 @@ services:
     container_name: proxy
     env_file:
       - .env
+    ports:
+      - "${PROXY_PORT}:${PROXY_PORT}"
     depends_on:
       - auth-service
       - messaging-service
       - core-service
 
   auth-service:
-    image: localhost/identity-service:1.0.0
+    image: identity-service:1.0.0
     container_name: auth-service
-    ports:
-      - "${BEAT_IDENTITY_SERVER}:${BEAT_IDENTITY_SERVER}"
     env_file:
       - .env
     environment:
-      - POSTGRES_DB=identity-db
+      - POSTGRES_DB=identity_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka-b:
+        condition: service_healthy
 
   messaging-service:
-    image: localhost/messaging-service:1.0.0
+    image: messaging-service:1.0.0
     container_name: messaging-service
-    ports:
-      - "${BEAT_MESSASSING_SERVER}:${BEAT_MESSASSING_SERVER}"
     env_file:
       - .env
     environment:
-      - POSTGRES_DB=messaging-db
+      - POSTGRES_DB=messaging_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka-b:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
 
   core-service:
-    image: localhost/core-service:1.0.0
+    image: core-service:1.0.0
     container_name: core-service
-    ports:
-      - "${BEAT_API_REST_PORT}:${BEAT_API_REST_PORT}"
     env_file:
       - .env
     environment:
-      - POSTGRES_DB=core-db
+      - POSTGRES_DB=core_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka-b:
+        condition: service_healthy
+
