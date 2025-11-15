@@ -11,20 +11,25 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, ... }@inputs:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        containerTool = let
-        envVal = builtins.getEnv "CONTAINER_TOOL";
+    let
+      setComposeTool = fallback:
+        let
+          tool = builtins.getEnv "CONTAINER_TOOL";
         in
-        if envVal == "" then "podman" else envVal;
+        if tool == "" then fallback else tool;
 
-        pkgs = nixpkgs.legacyPackages.${system};
-        servicesConfig = import ./nix/services.nix;
-
-        systemLinux =
+      getSystem = pkgs: system:
           if pkgs.stdenv.isAarch64 then "aarch64-linux"
           else if pkgs.stdenv.isx86_64 then "x86_64-linux"
           else system;
+    in
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        containerTool = setComposeTool "docker";
+        pkgs = nixpkgs.legacyPackages.${system};
+        servicesConfig = import ./nix/services.nix;
+
+        systemLinux = getSystem pkgs system;
 
         buildService = name: config:
           if config.flake then
