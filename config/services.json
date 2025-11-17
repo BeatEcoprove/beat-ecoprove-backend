@@ -14,7 +14,7 @@
       "api_version": 1,
       "prefix": "/core",
       "strip_prefix": true,
-      "skip_prefix_for": [ "/swagger" ]
+      "skip_prefix_for": [ "/swagger", "/public" ]
     },
     "messaging-service": {
       "host": "messaging-service",
